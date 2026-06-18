@@ -115,18 +115,26 @@ If Module 1 identifies skill-based gaps you want to address before applying, the
 
 </details>
 
+### Verification
+
+Mechanical checks &mdash; bullet word counts, banned-language scans, numeric licensing &mdash; run as embedded Python inside the modules themselves. The model fills the harness with data but cannot modify the check logic, so the result is measured, not asserted. Judgment checks like voice and framing stay with the model, where they belong.
+
+When code execution is off, the system falls back to attention-based checking and tags its output with an explicit reduced-confidence flag &mdash; it degrades rather than breaks. In both modes the system is verifying itself; you write nothing.
+
 ---
 
 ## Quick Start
 
 ```
-1. Create a Claude account       -->  claude.ai (free tier works, Pro recommended)
+1. Turn on the analysis tool     -->  In claude.ai (Opus or Sonnet)
 2. Open a new chat               -->  Opus model recommended for best results
 3. Paste Module 1                -->  From modules/Module_1_JD_Ingestion.docx
 4. Add your resume + job desc    -->  Paste text or upload files after the module text
 5. Follow the prompts            -->  Answer questions, type 'continue' at checkpoints
 6. Paste Modules 2, 3, 4        -->  In the same chat, one at a time
 ```
+
+> **About step 1:** This is a settings toggle, not code you write or run. With the analysis tool on, the modules run their own verification as embedded Python &mdash; the check code is baked into the prompts, so you still just paste. With it off, the system falls back to attention-based checking and tags its output as reduced-confidence. The toggle works on both Opus and Sonnet.
 
 > **Important:** All four modules must run in the **same chat session**. Do not switch between chats mid-process.
 
@@ -169,7 +177,9 @@ ResForge/
 |-----------|--------------|
 | **Evidence Binding** | No claim appears on the resume without a confirmed source in the Evidence Ledger. |
 | **Locked Metrics** | Every metric is locked with exact permissible phrasing before drafting. Observational data is marked `QUALITATIVE ONLY` and cannot be promoted to quantified claims. Three fabrication patterns are explicitly prohibited. |
-| **Gate Architecture** | Eight quality gates with blocking/advisory distinction. Blocking gates halt output until violations are resolved. |
+| **Fabrication Control as Data** | Every emittable number must trace to a canonical licensed metrics registry. An unlicensed number blocks generation. |
+| **Gate Architecture** | Mechanical gates run as fixed code with a blocking/advisory distinction; blocking gates halt output until resolved. Judgment gates remain model-evaluated. |
+| **Verification over Assertion** | Compliance is proven by running code against seeded test fixtures with known answers, not asserted by the model. |
 | **No-Fabrication Enforcement** | Bans overclaiming, defensive framing, and AI-pattern language. Insufficient evidence = NO-GO. |
 | **D2 Quality Scorecard** | 11-dimension final verification produces a concrete quality rating before output. |
 | **Checkpoint System** | Mandatory stops prevent AI context window exhaustion. Each module has 1&ndash;4 checkpoints. |
@@ -180,9 +190,9 @@ ResForge/
 
 | Model | Best For | Tradeoffs |
 |-------|----------|-----------|
-| **Opus** | Priority applications | Best constraint adherence. Self-scores within 0.5 pts of external audit. Catches metadata leakage and framing violations that Sonnet misses. |
-| **Sonnet** | Volume applications | Faster, uses less message budget. Higher rate of banned phrase violations and filler bullets. Self-scores can inflate by 1.5&ndash;2 pts. Pair with manual metric verification. |
-| **Sonnet + Extended Thinking** | Structural quality | Better JD coverage and fewer major metric fabrications, but does not reliably improve self-verification. Additional reasoning space tends to rationalize rather than catch violations. |
+| **Opus** | Priority applications | Stronger judgment on voice, framing, and reframing decisions. Self-scores within 0.5 pts of external audit. Catches subtle framing violations and metadata leakage that Sonnet rationalizes past. |
+| **Sonnet** | Volume applications | Faster, uses less message budget. Weaker judgment on voice and framing; self-scores can inflate by 1.5&ndash;2 pts. Mechanical gates (word counts, banned phrases, metric licensing) catch identically on either model. |
+| **Sonnet + Extended Thinking** | Structural quality | Better JD coverage and structural framing, but does not reliably improve self-verification &mdash; the added reasoning space tends to rationalize rather than catch judgment violations. |
 
 ---
 
@@ -190,7 +200,10 @@ ResForge/
 
 > These are documented limitations, not hidden ones. Contributions that address them are welcome.
 
-- **Guardrail enforcement depends on model attention**, not code verification. Banned phrases slip through at ~5&ndash;15% on Opus, ~10&ndash;20% on Sonnet.
+- **Verification quality depends on the analysis tool being on.** With it off, fallback mode estimates rather than measures, and the reduced-confidence flag is the honest signal &mdash; not a workaround.
+- **Garbage in, garbage out.** The model populates the data the harness checks, so a wrong data entry passes the gate cleanly. Diff the checked-text echo against your source before trusting the result.
+- **Metric licensing is only as good as the registry behind it.** The system cannot catch a claim it was never told the truth about.
+- **Self-test fixture counts reflect the current fixtures**, not a guarantee about all inputs.
 - **Summary openings** tend toward template language.
 - **Cover letter rhythm** can be monotone on Sonnet (see the voice editing tip in the User Guide).
 - **Self-assessment inflation** is reduced but not eliminated by the D2 Quality Scorecard &mdash; external verification is recommended for priority applications.
